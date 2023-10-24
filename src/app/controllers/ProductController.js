@@ -1,6 +1,7 @@
 import * as Yup from 'yup'
 import Category from '../models/Category'
 import Product from '../models/Product'
+import User from '../models/User'
 
 class ProductsController {
   async store(request, response) {
@@ -15,6 +16,12 @@ class ProductsController {
         await screma.validateSync(request.body, { abortEarly: false })
     } catch (err) {
         return response.status(400).json({ error: err.errors })
+    }
+    
+    const { admin: isAdmin } = await User.findByPk(request.userId)
+
+    if (!isAdmin) {
+      return response.status(401).json()
     }
 
     const { filename: path } = request.file
